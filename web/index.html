@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Wine Advisor - Trova l'abbinamento perfetto di vino per ogni piatto o atmosfera.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wine Advisor">
+  <meta name="theme-color" content="#3C0311">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Wine Advisor — Haute Sommellerie</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #FCF9F6;
+    }
+    #loading-indicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #581825 0%, #3C0311 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #FDCC85;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+    .wine-spin {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(253, 204, 133, 0.2);
+      border-top-color: #FDCC85;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-indicator">
+    <div style="width: 56px; height: 56px; margin-bottom: 16px; border-radius: 50%; background: linear-gradient(135deg, #7B1E30 0%, #3C0311 100%); border: 1.5px solid rgba(253, 204, 133, 0.4); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.35);">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="#FDCC85"><path d="M12 2C8.13 2 5 5.13 5 9c0 3.09 1.95 5.72 4.71 6.72L9 19H7v2h10v-2h-2l-.71-3.28C17.05 14.72 19 12.09 19 9c0-3.87-3.13-7-7-7zm0 2c2.76 0 5 2.24 5 5 0 .28-.03.55-.07.82l-9.86-1.74C7.29 4.97 9.42 4 12 4z"/></svg>
+    </div>
+    <div class="wine-spin"></div>
+    <div style="font-size: 22px; font-weight: 700; letter-spacing: 1.5px; color: #FDCC85;">Wine Advisor</div>
+    <div style="font-size: 13px; color: #E6C09C; margin-top: 6px; opacity: 0.85;">Caricamento cantina ed elementi...</div>
+  </div>
+  <script>
+    function dismissLoader() {
+      var el = document.getElementById('loading-indicator');
+      if (el) {
+        el.style.opacity = '0';
+        setTimeout(function () {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 500);
+      }
+    }
+    window.addEventListener('flutter-first-frame', dismissLoader);
+    var obs = new MutationObserver(function (mutations, observer) {
+      if (document.querySelector('flutter-view, flt-glass-pane, flt-scene-host, canvas')) {
+        dismissLoader();
+        observer.disconnect();
+      }
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+    setTimeout(dismissLoader, 3000);
+
+    // === Sommelier Web Speech Synthesis ===
+    window.speakSommelierText = function(text, lang) {
+      try {
+        if (!('speechSynthesis' in window)) return false;
+        window.speechSynthesis.cancel();
+        var clean = text.replace(/[*#_•`]/g, '').replace(/\s+/g, ' ').trim();
+        var utterance = new SpeechSynthesisUtterance(clean);
+        utterance.lang = (lang === 'en') ? 'en-US' : 'it-IT';
+        utterance.rate = 0.98;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+        return true;
+      } catch (err) {
+        console.warn('Speech synthesis error:', err);
+        return false;
+      }
+    };
+    window.stopSommelierVoice = function() {
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+      } catch (err) {}
+    };
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
